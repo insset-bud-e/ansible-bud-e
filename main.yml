@@ -9,16 +9,54 @@
     # action: setup will gather facts after python2 has been installed
     - action: setup
   tasks:
-    - name: install nodejs
-      include_role:
-        name: SimpliField.node
-    - name: install nginx
-      include_role:
-        name: nginxinc.nginx-oss
-    - name: Creates directory www
-      file: path=/var/www/html state=directory
-    - name: install bud-e-back 
+    #-----------------------------
+    # install pip for docker-py
+    #-----------------------------
+    - name: check to see if pip is already installed
+      command: "pip --version"
+      ignore_errors: true
+      register: pip_is_installed
+      changed_when: false
+    - block:
+      - name: download get-pip.py
+        get_url: url=https://bootstrap.pypa.io/get-pip.py  dest=/tmp
+      - name: install pip
+        command: "python /tmp/get-pip.py"
+      - name: delete get-pip.py
+        file: state=absent path=/tmp/get-pip.py
+      when: pip_is_installed.rc != 0
+
+    #-----------------------------
+    # install docker and docker-py
+    #-----------------------------
+    - name: Install docker with script
+      script: scripts/docker-install.sh
+
+    - name: Install docker-py
+      shell: "pip install docker-py"
+
+    #-----------------------------
+    # install and run container
+    #-----------------------------
+    - name: install bud-e-front 
       git:
-        repo: 'https://github.com/insset-bud-e/bud-e-back.git'
-        dest: /var/www/html/bud-e-back
+        repo: 'https://github.com/insset-bud-e/bud-e-front.git'
+        dest: /tmp/bud-e-front
+        update: no
+
+    # copy dockerfile in project source 
+    - copy:
+        src: /bud-e-front/dockerfile
+        dest: /tmp/bud-e-front/dockerfile
+        owner: root
+        group: root
+            
+    - name: build the image
+      docker_image: >
+        name=built-by-ansible
+        tag=ex1
+        path=/tmp/bud-e-front
+        state=present
+
+    
       
