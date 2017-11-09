@@ -1,16 +1,15 @@
-FROM    centos:centos6
+FROM node:boron
 
-# Enable Extra Packages for Enterprise Linux (EPEL) for CentOS
-RUN     yum install -y epel-release
-# Install Node.js and npm
-RUN     yum install -y nodejs npm
-
-# Bundle app source
-COPY . /src
+# Create app directory
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY package.json /src/package.json
-RUN cd /src; npm install --production
+COPY package.json /usr/src/app/
+RUN npm install
 
-EXPOSE  8080
-CMD cd /src; npm run build --report
+# Bundle app source
+COPY . /usr/src/app
+
+EXPOSE 8080
+CMD [ "npm", "start" ]

@@ -36,7 +36,7 @@
       shell: "pip install docker-py"
 
     #-----------------------------
-    # install and run container
+    # install and run container bud-e-front
     #-----------------------------
     - name: install bud-e-front 
       git:
@@ -45,18 +45,30 @@
         update: no
 
     # copy dockerfile in project source 
-    - copy:
-        src: /bud-e-front/dockerfile
-        dest: /tmp/bud-e-front/dockerfile
-        owner: root
-        group: root
+    - name : copy docker file
+      copy:
+        src: /home/callot/Projet/ansible/nodejs-ansible/bud-e-front/
+        dest: /tmp/bud-e-front/
+        directory_mode: yes
             
-    - name: build the image
-      docker_image: >
-        name=built-by-ansible
-        tag=ex1
-        path=/tmp/bud-e-front
-        state=present
+    - name: build the image bud-e-front
+      docker_image: 
+        path: "/tmp/bud-e-front" 
+        name: "fre3x/bud-e-front" 
+        state: build 
+        container_limits:
+          memswap: 0
+    
+    - name: run bud-e-front container
+      docker:
+        name: bud-e-front
+        image: fre3x/bud-e-front
+        state: started
+        expose:
+          - 8080
+        volumes:
+          - /data
+        
 
     
       
