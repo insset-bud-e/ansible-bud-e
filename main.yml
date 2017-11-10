@@ -38,6 +38,9 @@
     #-----------------------------
     # install and run container bud-e-front
     #-----------------------------
+    - name: remove all container 
+      shell: "docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)"
+
     - name: install bud-e-front 
       git:
         repo: 'https://github.com/insset-bud-e/bud-e-front.git'
@@ -64,8 +67,9 @@
         name: bud-e-front
         image: fre3x/bud-e-front
         state: started
-        expose:
-          - 8080
+        log_driver: syslog
+        ports: 
+        - "8080:8080"
         volumes:
           - /data
         
