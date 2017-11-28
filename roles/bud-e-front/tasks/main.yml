@@ -1,0 +1,71 @@
+---
+#-----------------------------
+# install pip for docker-py
+#-----------------------------
+- name: check to see if pip is already installed
+  command: "pip --version"
+  # ignore_errors: true
+  register: pip_is_installed
+  changed_when: false
+- block:
+  - name: download get-pip.py
+    get_url: url=https://bootstrap.pypa.io/get-pip.py  dest=/tmp
+  - name: install pip
+    command: "python /tmp/get-pip.py"
+  - name: delete get-pip.py
+    file: state=absent path=/tmp/get-pip.py
+  when: pip_is_installed.rc != 0
+
+#-----------------------------
+# install docker and docker-py
+#-----------------------------
+- name: Install docker with script
+  script: files/docker-install.sh
+  register: docker_install
+
+- name: Install docker-py
+  shell: "pip install docker-py"
+
+#-----------------------------
+# install and run container bud-e-front
+#-----------------------------
+- name: remove all container 
+  shell: "docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)"
+  # command result : 
+  register: command_result
+  failed_when: "'FAILED' in command_result.stderr"
+
+- name: install bud-e-front 
+  git:
+    repo: 'https://github.com/insset-bud-e/bud-e-front.git'
+    dest: /tmp/bud-e-front
+    update: no
+
+# copy dockerfile in project source 
+- name : copy docker file
+  copy:
+    src: /home/callot/Projet/ansible/nodejs-ansible/roles/bud-e-front/files/dockerfile
+    dest: /tmp/bud-e-front/dockerfile
+    #remote_src: yes
+    directory_mode: yes
+        
+- name: build the image bud-e-front
+  docker_image: 
+    path: "/tmp/bud-e-front" 
+    name: "fre3x/bud-e-front" 
+    state: build
+
+- name: run bud-e-front container
+  docker:
+    name: bud-e-front
+    image: fre3x/bud-e-front
+    state: started
+    log_driver: syslog
+    ports: 
+    - "8080:8080"
+    volumes:
+      - /data
+    
+
+
+  
