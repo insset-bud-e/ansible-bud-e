@@ -4,7 +4,6 @@
 #-----------------------------
 - name: check to see if pip is already installed
   command: "pip --version"
-  # ignore_errors: true
   register: pip_is_installed
   changed_when: false
 - block:
@@ -44,9 +43,8 @@
 # copy dockerfile in project source 
 - name : copy docker file
   copy:
-    src: /home/callot/Projet/ansible/nodejs-ansible/roles/bud-e-front/files/dockerfile
+    src: "{{ docker_file_path }}"
     dest: /tmp/bud-e-front/dockerfile
-    #remote_src: yes
     directory_mode: yes
         
 - name: build the image bud-e-front

@@ -3,6 +3,11 @@
   remote_user: root
   become: true
   gather_facts: false
+  # Vars for different role
+  vars:
+    # var to dockerfile path 
+    docker_file_path: /home/callot/Projet/ansible/nodejs-ansible/roles/bud-e-front/files/dockerfile
+  
   # Ansible requires python2, which is not installed by default on Ubuntu Xenial
   pre_tasks:
     - raw: sudo apt-get -y install python-simplejson
