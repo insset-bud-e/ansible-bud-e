@@ -6,6 +6,7 @@
   command: "pip --version"
   register: pip_is_installed
   changed_when: false
+  ignore_errors: True
 - block:
   - name: download get-pip.py
     get_url: url=https://bootstrap.pypa.io/get-pip.py  dest=/tmp
