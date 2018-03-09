@@ -1,4 +1,6 @@
 # Ansible script for bud-e-back 
+## Deployment diagram 
+![deployment diagram](deployment.png)
 ## Tested version 
 - Vagrant 2.0.2
 - ansible 2.3.1.0
