@@ -6,6 +6,7 @@
   command: "pip --version"
   register: pip_is_installed
   changed_when: false
+  ignore_errors: True
 - block:
   - name: download get-pip.py
     get_url: url=https://bootstrap.pypa.io/get-pip.py  dest=/tmp
@@ -53,17 +54,29 @@
     name: "fre3x/bud-e-front" 
     state: build
 
+- name: install mongob container
+  docker: 
+    name: mongo-bud-e
+    image: mongo
+    state: started
+    log_driver: syslog
+    volumes:
+      - /data
+
 - name: run bud-e-front container
   docker:
     name: bud-e-front
     image: fre3x/bud-e-front
     state: started
     log_driver: syslog
+    links: 
+    - "mongo-bud-e:mongo"
     ports: 
     - "8080:8080"
     volumes:
       - /data
-    
+
+
 
 
   
